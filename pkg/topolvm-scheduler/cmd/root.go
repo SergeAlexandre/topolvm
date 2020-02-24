@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/cybozu-go/log"
 	"net/http"
 	"os"
 
@@ -47,6 +48,8 @@ func subMain() error {
 	if err != nil {
 		return err
 	}
+
+	log.Info(fmt.Sprintf("Topolvm scheduler extender listening on %s with divisor=%f", config.listenAddr, config.divisor), nil)
 
 	h, err := scheduler.NewHandler(config.divisor)
 	if err != nil {

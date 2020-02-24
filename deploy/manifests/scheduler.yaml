@@ -50,16 +50,18 @@ spec:
       serviceAccountName: topolvm-scheduler
       containers:
         - name: topolvm-scheduler
-          image: quay.io/cybozu/topolvm:0.3.0
+          image: ezcplugins/topolvm-vslog:0.3.0    # Patched image
           command:
             - /topolvm-scheduler
             - --listen=localhost:9251
             - --divisor=1
+            - --loglevel=debug
           livenessProbe:
             httpGet:
               host: localhost
               port: 9251
               path: /status
+            periodSeconds: 120    # Was 10. 120 to avoir logs polution
       hostNetwork: true
       tolerations:
         - key: CriticalAddonsOnly

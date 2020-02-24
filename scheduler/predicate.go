@@ -2,11 +2,11 @@ package scheduler
 
 import (
 	"encoding/json"
+	"github.com/cybozu-go/topolvm"
+	"github.com/cybozu-go/topolvm/pkg/vslog"
+	corev1 "k8s.io/api/core/v1"
 	"net/http"
 	"strconv"
-
-	"github.com/cybozu-go/topolvm"
-	corev1 "k8s.io/api/core/v1"
 )
 
 func filterNodes(nodes corev1.NodeList, requested int64) ExtenderFilterResult {
@@ -71,9 +71,18 @@ func (s scheduler) predicate(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "bad request", http.StatusBadRequest)
 		return
 	}
-
 	requested := extractRequestedSize(input.Pod)
+
+	if vslog.IsEnabled() {
+		vslog.Printf("----- Predicate input for Pod:%s  Requested size:%d  (%dGB):\n%s", input.Pod.Name, requested, requested >> 30, input.String())
+	}
+
 	result := filterNodes(*input.Nodes, requested)
 	w.Header().Set("content-type", "application/json")
+
+	if vslog.IsEnabled() {
+		vslog.Printf("----- Predicate result for Pod:%s:\n%s", input.Pod.Name, result.String())
+	}
+
 	json.NewEncoder(w).Encode(result)
 }

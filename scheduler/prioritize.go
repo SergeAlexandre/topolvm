@@ -2,6 +2,7 @@ package scheduler
 
 import (
 	"encoding/json"
+	"github.com/cybozu-go/topolvm/pkg/vslog"
 	"math"
 	"net/http"
 	"strconv"
@@ -53,8 +54,15 @@ func (s scheduler) prioritize(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Bad Request.", http.StatusBadRequest)
 		return
 	}
+	if vslog.IsEnabled() {
+		vslog.Printf("----- Prioritize input for Pod:%s:\n%s", input.Pod.Name, input.String())
+	}
 
 	result := scoreNodes(input.Nodes.Items, s.divisor)
+
+	if vslog.IsEnabled() {
+		vslog.Printf("----- Prioritize result for Pod:%s:\n%s", input.Pod.Name, HostPriorityList2String(result))
+	}
 
 	w.Header().Set("content-type", "application/json")
 	json.NewEncoder(w).Encode(result)
